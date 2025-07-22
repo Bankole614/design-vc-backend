@@ -1,12 +1,16 @@
 import express from 'express';
 import { pool } from './db';
 import dotenv from 'dotenv';
+import authRoutes from './routes/auth';
+
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 
 const port = process.env.PORT || 3000;
+
+app.use('/api/auth', authRoutes);
 
 // Test endpoint: query current timestamp
 app.get('/api/db-time', async (_req, res) => {
