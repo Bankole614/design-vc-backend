@@ -10,6 +10,8 @@ app.use(express.json());
 
 const port = process.env.PORT || 3000;
 
+app.get("/api/ping", (_req, res) => res.send("pong"));
+
 app.use('/api/auth', authRoutes);
 
 // Test endpoint: query current timestamp
