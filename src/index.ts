@@ -1,6 +1,7 @@
 import express from 'express';
 import { pool } from './db';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import authRoutes from './routes/auth';
 import { authenticateJWT } from './middleware/auth';
 import branchRoutes  from './routes/branches';
@@ -11,6 +12,7 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 const port = process.env.PORT || 3000;
 
