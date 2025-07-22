@@ -2,6 +2,10 @@ import express from 'express';
 import { pool } from './db';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
+import { authenticateJWT } from './middleware/auth';
+import branchRoutes  from './routes/branches';
+import versionRoutes from './routes/versions';
+import projectRoutes     from './routes/projects';
 
 dotenv.config();
 
@@ -14,20 +18,15 @@ app.get("/api/ping", (_req, res) => res.send("pong"));
 
 app.use('/api/auth', authRoutes);
 
-// Test endpoint: query current timestamp
-app.get('/api/db-time', async (_req, res) => {
-  try {
-    const { rows } = await pool.query('SELECT NOW() as now');
-    res.json({ now: rows[0].now });
-  } catch (err) {
-    console.error('DB error:', err);
-    res.status(500).json({ error: 'Database error' });
-  }
-});
+// Projects
+app.use('/api/projects', authenticateJWT, projectRoutes);
 
-app.get('/api/hello', (_req, res) => {
-  res.json({ message: '👋 Hello again!' });
-});
+// Branches
+app.use('/api/projects/:projectId/branches', authenticateJWT, branchRoutes);
+// (inside branchRoutes, we use param :projectId if needed)
+
+// Versions
+app.use('/api/branches/:branchId/versions', authenticateJWT, versionRoutes);
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);

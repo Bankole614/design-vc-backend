@@ -35,26 +35,40 @@ router.post('/register', async (req, res) => {
 // Login: validate and issue JWT
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'Email & password required' });
+  if (!email || !password) {
+    return res
+      .status(400)
+      .json({ error: 'Email and password are required' });
+  }
 
   try {
-    // Fetch user
+    // 1) Look up the user
     const { rows } = await pool.query(
       'SELECT id, password_hash FROM users WHERE email = $1',
       [email]
     );
     const user = rows[0];
-    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
-    // Verify password
+    // 2) Compare password
     const valid = await bcrypt.compare(password, user.password_hash);
-    if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!valid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
-    // Issue JWT
-    const token = jwt.sign({ userId: user.id, email }, JWT_SECRET, { expiresIn: '1h' });
+    // 3) Issue JWT
+    const token = jwt.sign(
+      { userId: user.id, email },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // 4) Send token to client
     res.json({ token });
   } catch (err) {
-    console.error(err);
+    console.error('Login error:', err);
     res.status(500).json({ error: 'Login failed' });
   }
 });
