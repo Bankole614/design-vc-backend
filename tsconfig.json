@@ -8,5 +8,6 @@
     "resolveJsonModule": true,
     "lib": ["es2021", "dom"],
     "strict": true
-  }
+  },
+  "include": ["src"]
 }

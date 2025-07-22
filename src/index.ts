@@ -1,4 +1,3 @@
-// src/index.ts
 import express from 'express';
 import { pool } from './db';
 import dotenv from 'dotenv';
