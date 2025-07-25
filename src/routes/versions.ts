@@ -1,13 +1,13 @@
+// src/routes/versions.ts
 import { Router } from 'express';
-import { pool }   from '../db';
+import { pool }    from '../db';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 /**
- * GET /api/branches/:branchId/versions
- * List all versions (commits) on a branch.
+ * GET  /api/branches/:branchId/versions
  */
-router.get('/:branchId/versions', async (req, res) => {
+router.get('/', async (req, res) => {
   const branchId = Number(req.params.branchId);
   try {
     const { rows } = await pool.query(
@@ -26,15 +26,13 @@ router.get('/:branchId/versions', async (req, res) => {
 
 /**
  * POST /api/branches/:branchId/versions
- * Commit a new version to a branch.
- * Body: { commit_message, file_url }
  */
-router.post('/:branchId/versions', async (req, res) => {
-  const userId = req.user!.userId;
+router.post('/', async (req, res) => {
   const branchId = Number(req.params.branchId);
+  const userId = req.user!.userId;
   const { commit_message, file_url } = req.body;
   if (!commit_message || !file_url) {
-    return res.status(400).json({ error: 'Message and file URL required' });
+    return res.status(400).json({ error: 'Message & file URL required' });
   }
 
   try {

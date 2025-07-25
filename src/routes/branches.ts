@@ -1,26 +1,24 @@
+// src/routes/branches.ts
 import { Router } from 'express';
-import { pool }   from '../db';
+import { pool }    from '../db';
 
-const router = Router();
+const router = Router({ mergeParams: true }); // important for nested params
 
 /**
- * GET /api/projects/:projectId/branches
- * List all branches for a project.
+ * GET  /api/projects/:projectId/branches
+ * List branches for a project
  */
-router.get('/:projectId/branches', async (req, res) => {
-  const userId = req.user!.userId;
+router.get('/', async (req, res) => {
   const projectId = Number(req.params.projectId);
-
-  // Optional: verify user has access to the project
   try {
-    const { rows: branches } = await pool.query(
+    const { rows } = await pool.query(
       `SELECT id, name, created_by, created_at
        FROM branches
        WHERE project_id = $1
        ORDER BY created_at DESC`,
       [projectId]
     );
-    res.json({ branches });
+    res.json({ branches: rows });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch branches' });
@@ -29,16 +27,13 @@ router.get('/:projectId/branches', async (req, res) => {
 
 /**
  * POST /api/projects/:projectId/branches
- * Create a new branch in a project.
- * Body: { name }
+ * Create a new branch
  */
-router.post('/:projectId/branches', async (req, res) => {
-  const userId = req.user!.userId;
+router.post('/', async (req, res) => {
   const projectId = Number(req.params.projectId);
+  const userId = req.user!.userId;
   const { name } = req.body;
-  if (!name) {
-    return res.status(400).json({ error: 'Branch name required' });
-  }
+  if (!name) return res.status(400).json({ error: 'Name required' });
 
   try {
     const { rows } = await pool.query(
